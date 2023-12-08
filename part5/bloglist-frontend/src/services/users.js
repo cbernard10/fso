@@ -9,9 +9,9 @@ let token = null;
 
 const getUser = async (id) => {
 //   const config = {
-    // headers: { Authorization: token },
+//   headers: { Authorization: token },
 //   };
-  const response = await axios.get(`${baseUrl}/${id}`, config);
+  const response = await axios.get(`${baseUrl}/${id}`);
   return response.data;
 };
 

@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import Blog from "./components/Blog";
 import blogService from "./services/blogs";
 import loginService from "./services/login";
 import Togglable from "./components/Togglable";
@@ -11,7 +10,7 @@ const Notification = ({ message, type }) => {
     return null;
   }
 
-  return <div className={type}>{message}</div>;
+  return <div className={type} id="notificationBox">{message}</div>;
 };
 
 const App = () => {
@@ -20,10 +19,6 @@ const App = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [user, setUser] = useState(null);
-
-  const [newBlog, setNewBlog] = useState("");
-  const [newUrl, setNewUrl] = useState("");
-  const [newAuthor, setNewAuthor] = useState("");
 
   const [message, setMessage] = useState({ text: null, type: "success" });
 
@@ -47,6 +42,7 @@ const App = () => {
       <div>
         username
         <input
+          id="usernameInput"
           type="text"
           value={username}
           name="Username"
@@ -56,50 +52,21 @@ const App = () => {
       <div>
         password
         <input
+          id="passwordInput"
           type="password"
           value={password}
           name="Password"
           onChange={({ target }) => setPassword(target.value)}
         />
       </div>
-      <button type="submit">login</button>
+      <button type="submit" id="loginButton">login</button>
     </form>
   );
 
-  const addBlog = (event) => {
-    event.preventDefault();
-    const blogObject = {
-      title: newBlog,
-      author: newAuthor,
-      url: newUrl,
-    };
-
-    blogService.create(blogObject).then((res) => {
-      setBlogFormVisible(false);
+  const addBlog = async (blog) => {
+    blogService.create(blog).then((res) => {
       setBlogs(blogs.concat(res));
-      setNewBlog("");
-      setNewAuthor("");
-      setNewUrl("");
-      setMessage({ text: "Blog added", type: "success" });
-      setTimeout(() => {
-        setMessage({ text: null, type: "success" });
-      }, 5000);
     });
-  };
-
-  const handleBlogChange = (event) => {
-    console.log(event.target.value);
-    setNewBlog(event.target.value);
-  };
-
-  const handleAuthorChange = (event) => {
-    console.log(event.target.value);
-    setNewAuthor(event.target.value);
-  };
-
-  const handleUrlChange = (event) => {
-    console.log(event.target.value);
-    setNewUrl(event.target.value);
   };
 
   const blogForm = () => (
@@ -110,13 +77,8 @@ const App = () => {
     >
       <BlogForm
         addBlog={addBlog}
-        handleBlogChange={handleBlogChange}
-        handleAuthorChange={handleAuthorChange}
-        handleUrlChange={handleUrlChange}
-        newBlog={newBlog}
-        newAuthor={newAuthor}
-        newUrl={newUrl}
-        user={user}
+        setBlogFormVisible={setBlogFormVisible}
+        setMessage={setMessage}
       />
     </Togglable>
   );
@@ -150,6 +112,27 @@ const App = () => {
     }
   };
 
+  const handleLike = (blog) => {
+    // adds one like to the blog post in the database and updates the state of the blog list
+    const updatedBlog = {
+      ...blog,
+      likes: blog.likes + 1,
+    };
+
+    console.log(updatedBlog);
+
+    blogService.update(blog.id, updatedBlog).then((res) => {
+      console.log(res);
+      setBlogs(blogs.map((blog) => (blog.id === res.id ? res : blog)));
+    });
+  };
+
+  const handleDelete = (blogToDelete) => {
+    blogService.remove(blogToDelete.id).then(() => {
+      setBlogs(blogs.filter((blog) => blog.id !== blogToDelete.id));
+    });
+  };
+
   return (
     <div>
       <Notification message={message.text} type={message.type} />
@@ -166,7 +149,12 @@ const App = () => {
 
             </div>
           ))} */}
-          <BlogList blogs={blogs.sort((a,b) => b.likes - a.likes)} user={user} />
+          <BlogList
+            blogs={blogs.sort((a, b) => b.likes - a.likes)}
+            user={user}
+            handleLike={handleLike}
+            handleDelete={handleDelete}
+          />
         </div>
       )}
     </div>

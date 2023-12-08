@@ -1,10 +1,7 @@
 import { useState } from "react";
-import blogService from "../services/blogs";
 
-const Blog = ({ blog, user }) => {
+const Blog = ({ blog, user, handleLike, handleDelete }) => {
   const [visible, setVisible] = useState(false);
-
-  const [blogState, setBlogState] = useState(blog);
 
   const blogStyle = {
     paddingTop: 10,
@@ -14,32 +11,20 @@ const Blog = ({ blog, user }) => {
     marginBottom: 5,
   };
 
-  const handleLike = () => {
-    // adds one like to the blog post in the database and updates the state of the blog post
-    const updatedBlog = {
-      ...blog,
-      user: blogState.user.id,
-      likes: blogState.likes + 1,
-    };
-    blogService.update(blogState.id, updatedBlog).then((res) => {
-      setBlogState(res);
-    });
-  };
-
-  const handleDelete = () => {
-    blogService.remove(blogState.id).then(() => {
-      setBlogState(null);
-    });
-  };
-
   return (
-    <div>
-      {blogState && (
-        <div style={blogStyle}>
-          {blogState.title} {blogState.author}
+    <li className="blog">
+      {blog && (
+        <div style={blogStyle} className="">
+          <div
+            className="basicInfo"
+            style={{ display: "flex", flexDirection: "column" }}
+          >
+            <div>Title: {blog.title}</div>
+            <div>Author: {blog.author}</div>
+          </div>
           <button
+            className="viewButton"
             onClick={() => {
-
               setVisible(!visible);
             }}
           >
@@ -51,20 +36,31 @@ const Blog = ({ blog, user }) => {
                 ? { display: "flex", flexDirection: "column" }
                 : { display: "none" }
             }
+            className="moreInfo"
           >
-            <div>
-              {blogState.likes} <button onClick={handleLike}>like</button>
+            <div style={{ display: "flex" }}>
+              <span>likes:</span>
+              <span id="likes">{blog.likes}</span>
+              <button id="likeButton"
+                onClick={() => handleLike({ ...blog, user: blog.user.id })}
+              >
+                like
+              </button>
             </div>
-            <div> {blogState.url}</div>
-            <div>{blogState.user.name ?? user.name}</div>
+            <div> {blog.url}</div>
+            <div>{blog.user.name ?? user.name}</div>
 
-            {blogState.user.name === user.name && (
-              <button onClick={handleDelete}>delete</button>
+            {blog.user.name === user.name && (
+              <button id="deleteButton"
+                onClick={() => handleDelete({ ...blog, user: blog.user.id })}
+              >
+                delete
+              </button>
             )}
           </div>
         </div>
       )}
-    </div>
+    </li>
   );
 };
 
