@@ -1,0 +1,16 @@
+POST http://localhost:3001/api/patients/d2773336-f723-11e9-8f0b-362b9e155667/entries
+Content-Type: application/json
+
+{
+    "date": "2019-10-04",
+    "type": "Hospital",
+    "description": "Surgery on patient's left ankle",
+    "specialist": "MD House",
+    "diagnosisCodes": [
+        "S82.5"
+    ],
+    "discharge": {
+        "date": "2019-10-04",
+        "criteria": "Thumb has healed"
+    }
+}
